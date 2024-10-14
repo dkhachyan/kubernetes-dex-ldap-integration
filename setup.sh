@@ -50,33 +50,7 @@ popd
 
 # Creating Kubernetes cluster with API Server configured
 log "Creating Kubernetes cluster with API Server configured ..."
-PROJECT_ROOT="$(pwd)" envsubst < kind/kind.yaml | kind create cluster --name dex-ldap-cluster --config -
-
-
-# Deploying OpenLDAP in namespace 'ldap' as the LDAP Server
-log "Deploying OpenLDAP in namespace 'ldap' as the LDAP Server ..."
-kubectl create ns ldap
-kubectl create secret generic openldap \
-    --namespace ldap \
-    --from-literal=adminpassword=adminpassword
-kubectl create configmap ldap \
-    --namespace ldap \
-    --from-file=ldap/ldif
-kubectl apply --namespace ldap -f ldap/ldap.yaml
-kubectl wait --namespace ldap --for=condition=ready pod -l app.kubernetes.io/name=openldap 
-
-
-# Initializing some dummy LDAP entities
-log "Initializing some dummy LDAP entities ..."
-sleep 5
-LDAP_POD=$(kubectl -n ldap get pod -l "app.kubernetes.io/name=openldap" -o jsonpath="{.items[0].metadata.name}")
-kubectl -n ldap exec $LDAP_POD -- ldapadd -x -D "cn=admin,dc=example,dc=org" -w adminpassword -H ldap://localhost:389 -f /ldifs/0-ous.ldif
-kubectl -n ldap exec $LDAP_POD -- ldapadd -x -D "cn=admin,dc=example,dc=org" -w adminpassword -H ldap://localhost:389 -f /ldifs/1-users.ldif
-kubectl -n ldap exec $LDAP_POD -- ldapadd -x -D "cn=admin,dc=example,dc=org" -w adminpassword -H ldap://localhost:389 -f /ldifs/2-groups.ldif
-# List down the entities loaded
-kubectl -n ldap exec $LDAP_POD -- \
-    ldapsearch -LLL -x -H ldap://localhost:389 -D "cn=admin,dc=example,dc=org" -w adminpassword -b "ou=people,dc=example,dc=org" dn
-
+PROJECT_ROOT="$(pwd)" envsubst < kind/kind.yaml | kind create cluster --name dex-cluster --config -
 
 # Deploying Dex in namespace 'dex'
 log "Deploying Dex in namespace 'dex' ..."
@@ -95,7 +69,7 @@ SVC_PORT="$(kubectl get -n dex svc/dex -o json | jq '.spec.ports[0].nodePort')"
 docker run -d --restart always \
     --name dex-kind-proxy-$SVC_PORT \
     --publish 127.0.0.1:$SVC_PORT:$SVC_PORT \
-    --link dex-ldap-cluster-control-plane:target \
+    --link dex-cluster-control-plane:target \
     --network kind \
     alpine/socat -dd \
     tcp-listen:$SVC_PORT,fork,reuseaddr tcp-connect:target:$SVC_PORT
