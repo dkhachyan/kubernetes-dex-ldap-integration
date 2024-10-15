@@ -97,11 +97,12 @@ data:
       - 'http://localhost:8000'
       - 'http://127.0.0.1:8080'
       - 'http://localhost:8080'
+      - 'http://host.docker.internal:8080'
       name: 'Example App'
       secret: ZXhhbXBsZS1hcHAtc2VjcmV0
       distributedClaims:
         projects:
-          endpoint: https://host.docker.internal:8080
+          endpoint: http://host.docker.internal:8080
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
