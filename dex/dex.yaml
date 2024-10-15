@@ -38,7 +38,7 @@ spec:
     spec:
       serviceAccountName: dex
       containers:
-      - image: ghcr.io/dexidp/dex:v2.30.0
+      - image: docker.io/kaasops/dex:v0.0.1
         name: dex
         command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
 
@@ -91,12 +91,15 @@ data:
       userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
 
     staticClients:
-    - id: example-app
+    - id: kubernetes
       redirectURIs:
       - 'http://127.0.0.1:8000'
       - 'http://localhost:8000'
       name: 'Example App'
       secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+      distributedClaims:
+        projects:
+          endpoint: https://127.0.0.1:8080
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

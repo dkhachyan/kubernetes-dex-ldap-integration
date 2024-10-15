@@ -29,7 +29,7 @@ spec:
     - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
     - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
     - --oidc-ca-file=/etc/ssl/certs/dex/ca.pem
-    - --oidc-client-id=example-app
+    - --oidc-client-id=kubernetes
     - --oidc-groups-claim=groups
     - --oidc-issuer-url=https://dex.dex.svc:32000
     - --oidc-username-claim=email
